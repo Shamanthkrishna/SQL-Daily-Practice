@@ -201,19 +201,6 @@ WHERE product_id NOT IN (	SELECT product_id
                             
 
 -- Q18.
--- Table: Views
--- Column Name Type
--- article_id int
--- author_id int
--- viewer_id int
--- view_date date
--- There is no primary key for this table, it may have duplicate rows.
--- Each row of this table indicates that some viewer viewed an article (written by some author) on some
--- date.
--- Note that equal author_id and viewer_id indicate the same person.
--- Write an SQL query to find all the authors that viewed at least one of their own articles.
--- Return the result table sorted by id in ascending order.
--- The query result format is in the following example.
 
 create table if not exists Views
 (
@@ -238,36 +225,6 @@ WHERE author_id = viewer_id
 ORDER BY author_id;
 
 -- Q19.
--- Table: Delivery
--- Column Name Type
--- delivery_id int
--- customer_id int
--- order_date date
--- customer_pref_delivery_date date
--- delivery_id is the primary key of this table.
--- The table holds information about food delivery to customers that make orders at some date and
--- specify a preferred delivery date (on the same order date or after it).
--- If the customer's preferred delivery date is the same as the order date, then the order is called
--- immediately; otherwise, it is called scheduled.
--- Write an SQL query to find the percentage of immediate orders in the table, rounded to 2 decimal
--- places.
--- The query result format is in the following example.
--- Input:
--- Delivery table:
--- delivery_id customer_id order_date
--- customer_pref_
--- delivery_date
--- 1 1 2019-08-01 2019-08-02
--- 2 5 2019-08-02 2019-08-02
--- 3 1 2019-08-11 2019-08-11
--- 4 3 2019-08-24 2019-08-26
--- 5 4 2019-08-21 2019-08-22
--- 6 2 2019-08-11 2019-08-13
--- Output:
--- immediate_percentage
--- 33.33
--- Explanation: The orders with delivery id 2 and 3 are immediate while the others are scheduled
-
 
 CREATE TABLE Delivery (
     delivery_id INT,
@@ -292,3 +249,110 @@ SELECT
 FROM 
     Delivery;
 
+-- Q20.
+
+CREATE TABLE Ads (
+    ad_id INT,
+    user_id INT,
+    action ENUM('Clicked', 'Viewed', 'Ignored')
+);
+
+INSERT INTO Ads (ad_id, user_id, action) VALUES
+(1, 1, 'Clicked'),
+(2, 2, 'Clicked'),
+(3, 3, 'Viewed'),
+(5, 5, 'Ignored'),
+(1, 7, 'Ignored'),
+(2, 7, 'Viewed'),
+(3, 5, 'Clicked'),
+(1, 4, 'Viewed'),
+(2, 11, 'Viewed'),
+(1, 2, 'Clicked');
+
+SELECT 
+	ad_id, 
+    COUNT(CASE WHEN action = 'Clicked' THEN 1 END) AS Count_Click,
+    COUNT(CASE WHEN action = 'Viewed' THEN 1 END) AS Count_View,
+    ROUND(
+		(COUNT(CASE WHEN action = 'Clicked' THEN 1 END) * 100) / 
+		(COUNT(CASE WHEN action = 'Clicked' THEN 1 END) + COUNT(CASE WHEN action = 'Viewed' THEN 1 END)), 
+        2
+        ) as CTR
+FROM ads
+GROUP BY ad_id
+ORDER BY CTR DESC, ad_id;
+
+-- Q21.
+
+CREATE TABLE Employee (
+    employee_id INT,
+    team_id INT
+);
+INSERT INTO Employee (employee_id, team_id) VALUES
+(1, 8),
+(2, 8),
+(3, 8),
+(4, 7),
+(5, 9),
+(6, 9);
+
+SELECT 	employee_id, team_id, 
+		COUNT(*) OVER (PARTITION BY team_id) AS team_size
+FROM Employee
+ORDER BY employee_id;
+
+-- Q22.
+
+-- Create the Countries table
+CREATE TABLE Countries (
+    country_id INT,
+    country_name VARCHAR(255)
+);
+
+-- Create the Weather table
+CREATE TABLE Weather (
+    country_id INT,
+    weather_state INT,
+    day DATE
+);
+
+-- Insert data into Countries table
+INSERT INTO Countries (country_id, country_name) VALUES
+(2, 'USA'),
+(3, 'Australia'),
+(7, 'Peru'),
+(5, 'China'),
+(8, 'Morocco'),
+(9, 'Spain');
+
+-- Insert data into Weather table
+INSERT INTO Weather (country_id, weather_state, day) VALUES
+(2, 15, '2019-11-01'),
+(2, 12, '2019-10-28'),
+(2, 12, '2019-10-27'),
+(3, -2, '2019-11-10'),
+(3, 0, '2019-11-11'),
+(3, 3, '2019-11-12'),
+(5, 16, '2019-11-07'),
+(5, 18, '2019-11-09'),
+(5, 21, '2019-11-23'),
+(7, 25, '2019-11-28'),
+(7, 22, '2019-12-01'),
+(7, 20, '2019-12-02'),
+(8, 25, '2019-11-05'),
+(8, 27, '2019-11-15'),
+(8, 31, '2019-11-25'),
+(9, 7, '2019-10-23'),
+(9, 3, '2019-12-23');
+
+
+SELECT c.country_name,
+CASE
+	WHEN AVG(w.weather_state*1.0) <= 15 THEN 'Cold'
+	WHEN AVG(w.weather_state*1.0) >= 25 THEN 'Hot'
+	ELSE 'Warm'
+END AS weather_type
+FROM Countries AS c
+INNER JOIN Weather w ON c.country_id = w.country_id
+WHERE w.day BETWEEN '2019-11-01' AND '2019-11-30'
+GROUP BY c.country_id, c.country_name;
