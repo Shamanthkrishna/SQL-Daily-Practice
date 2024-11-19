@@ -356,3 +356,37 @@ FROM Countries AS c
 INNER JOIN Weather w ON c.country_id = w.country_id
 WHERE w.day BETWEEN '2019-11-01' AND '2019-11-30'
 GROUP BY c.country_id, c.country_name;
+
+-- Q23.
+
+create table if not exists Prices
+(
+product_id int,
+start_date date,
+end_date date,
+price int,
+constraint pk PRIMARY KEY (product_id, start_date, end_date)
+);
+insert into Prices VALUES
+(1,'2019-02-17','2019-02-28',5),
+(1,'2019-03-01','2019-03-22',20),
+(2,'2019-02-01','2019-02-20',15),
+(2,'2019-02-21','2019-03-31',30);
+
+create table if not exists UnitsSold
+(
+product_id int,
+purchase_date date,
+units int
+);
+insert into UnitsSold VALUES
+(1,'2019-02-25',100),
+(1,'2019-03-01',15),
+(2,'2019-02-10',200),
+(2,'2019-03-22',30);
+
+SELECT 	a.product_id,
+		ROUND(SUM(price*units)/SUM(units), 2) AS AVG_PRICE
+FROM unitssold a
+JOIN prices b ON a.product_id = b.product_id AND purchase_date BETWEEN start_date AND end_date
+GROUP BY a.product_id;
