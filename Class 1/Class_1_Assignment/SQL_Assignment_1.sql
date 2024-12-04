@@ -419,3 +419,4 @@ FROM (	SELECT *,
 		FROM Activity) tmp
 WHERE tmp.row_num = 1;
 
+
