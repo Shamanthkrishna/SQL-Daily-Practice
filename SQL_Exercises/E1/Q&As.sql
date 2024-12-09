@@ -87,7 +87,21 @@ select m.name, p.name, p.price
 from products p
 join manufacturers m on p.Manufacturer = m.Code
 where price = (select max(price) from products WHERE Manufacturer = m.Code);
+
 -- 1.17 Add a new product: Loudspeakers, $70, manufacturer 2.
+INSERT INTO products (Code, Name, Price, Manufacturer)
+VALUES (11, 'Loudspeakers', 70, 2);
+
 -- 1.18 Update the name of product 8 to "Laser Printer".
+update products
+set name = 'Laser Printer'
+where code = 8;
+
 -- 1.19 Apply a 10% discount to all products.
+update products
+set price = price*0.9;
+
 -- 1.20 Apply a 10% discount to all products with a price larger than or equal to $120.
+update products
+set price = price*0.9
+where price >=120;
